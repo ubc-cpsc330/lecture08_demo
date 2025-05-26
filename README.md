@@ -1,4 +1,4 @@
-# Lecture 7 Demo: IMDB Ratings
+# Lecture 8 Demo: Optimizing Hyperparameters using Spotify
 
 You can use this repository as a template to create a repository for yourself so you can follow along with the Lecture demo.
 
