@@ -9,6 +9,7 @@ from sklearn.svm import SVC
 from sklearn.pipeline import Pipeline, make_pipeline
 from sklearn.ensemble import RandomForestClassifier
 
+
 def plot_tree_decision_boundary(
     model, X, y, x_label="x-axis", y_label="y-axis", eps=None, ax=None, title=None
 ):
@@ -27,6 +28,27 @@ def plot_tree_decision_boundary(
     ax.set_title(title)
 
 
+def plot_loss_diagram(labels_inside=False): # From Mike's notebook: https://github.com/UBC-CS/cpsc340-2020w2/blob/main/lectures/19_linear-classifiers-fit.ipynb        
+    grid = np.linspace(-2,2,1000)
+    plt.figure(figsize=(6, 4), dpi=80)
+    plt.xlabel('$y_iw^T x_i$', fontsize=18)
+    plt.ylabel('$f_i(w)$', fontsize=18)
+    plt.xlim(-2,2)
+    plt.ylim(-0.025,3)
+    plt.fill_between([0, 2], -1, 3, facecolor='blue', alpha=0.2);
+    plt.fill_between([-2, 0], -1, 3, facecolor='red', alpha=0.2);
+    plt.yticks([0,1,2,3]);
+
+    if labels_inside:
+        plt.text(-1.95, 2.73, "incorrect prediction", fontsize=15) # 2.68
+        plt.text(0.15, 2.73, "correct prediction", fontsize=15)
+    else:
+        plt.text(-1.95, 3.1, "incorrect prediction", fontsize=15) # 2.68
+        plt.text(0.15, 3.1, "correct prediction", fontsize=15)
+
+
+    plt.tight_layout()
+    
 def plot_tree_decision_boundary_and_tree(
     model, X, y, height=6, width=16, fontsize = 9, x_label="x-axis", y_label="y-axis", eps=None
 ):
@@ -91,7 +113,7 @@ def plot_knn_clf(X_train, y_train, X_test, n_neighbors=1, class_names=['class 0'
                 fc="k",
                 ec="k",
             )    
-    plt.show()
+    # plt.show()
 
 def plot_knn_decision_boundaries(X_train, y_train, k_values = [1,11,100]):
     fig, axes = plt.subplots(1, len(k_values), figsize=(15, 4))
@@ -106,7 +128,7 @@ def plot_knn_decision_boundaries(X_train, y_train, k_values = [1,11,100]):
             clf, X_train.to_numpy(), fill=True, eps=0.5, ax=ax, alpha=0.4
         )
         mglearn.discrete_scatter(X_train.iloc[:, 0], X_train.iloc[:, 1], y_train, ax=ax)
-        title = "n_neighbors={}\n train score={}, valid score={}".format(
+        title = "n_neighbors={}\n train score={},\n valid score={}".format(
             n_neighbors, round(mean_train_score, 2), round(mean_valid_score, 2)
         )
         ax.set_title(title)
@@ -154,7 +176,7 @@ def plot_svc_gamma(param_grid, X_train, y_train, x_label="longitude", y_label='l
             clf, X_train, fill=True, eps=0.5, ax=ax, alpha=0.4
         )
         mglearn.discrete_scatter(X_train[:, 0], X_train[:, 1], y_train, ax=ax)
-        title = "gamma={}\n train score={}, valid score={}".format(
+        title = "gamma={}\n train score={},\n valid score={}".format(
             gamma, round(mean_train_score, 2), round(mean_valid_score, 2)
         )
         ax.set_title(title)
@@ -174,7 +196,7 @@ def plot_svc_C(param_grid, X_train, y_train, x_label="longitude", y_label='latit
             clf, X_train, fill=True, eps=0.5, ax=ax, alpha=0.4
         )
         mglearn.discrete_scatter(X_train[:, 0], X_train[:, 1], y_train, ax=ax)
-        title = "C={}\n train score={}, valid score={}".format(
+        title = "C={}\n train score={},\n valid score={}".format(
             C, round(mean_train_score, 2), round(mean_valid_score, 2)
         )
         ax.set_title(title)
@@ -430,4 +452,31 @@ def plot_multiclass_lr_ovr(lr, X_train, y_train, n_classes, test_points=None, de
             plt.plot(test_point[0], test_point[1], "k*", markersize=16)
     if decision_boundary:
         mglearn.plots.plot_2d_classification(lr, X_train, fill=True, alpha=0.7)
-        
+
+# adapted from mglearn https://github.com/amueller/mglearn/blob/master/mglearn/tools.py
+def my_heatmap(values, xlabel, ylabel, xticklabels, yticklabels, cmap=None,
+            vmin=None, vmax=None, ax=None, fmt="%0.2f"):
+    if ax is None:
+        ax = plt.gca()
+    # plot the mean cross-validation scores
+    img = ax.pcolor(values, cmap=cmap, vmin=vmin, vmax=vmax)
+    img.update_scalarmappable()
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.set_xticks(np.arange(len(xticklabels)) + .5)
+    ax.set_yticks(np.arange(len(yticklabels)) + .5)
+    ax.set_xticklabels(xticklabels)
+    ax.set_yticklabels(yticklabels)
+    ax.set_aspect(1)
+
+    
+    iteration = 0
+    for p, color, value in zip(img.get_paths(), img.get_facecolors(),
+                               img.get_array().flatten()):
+        x, y = p.vertices[:-2, :].mean(0)
+        if np.mean(color[:3]) > 0.5:
+            c = 'k'
+        else:
+            c = 'w'        
+        ax.text(x, y, fmt % value, color=c, ha="center", va="center")
+    return img
